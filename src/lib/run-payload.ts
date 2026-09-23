@@ -38,6 +38,8 @@ export interface ClaimPayload {
 
 export interface RunPayload {
   run: RunSummary;
+  profileName: string;
+  jdTitle: string;
   drafts: DraftPayload[];
   claims: ClaimPayload[];
 }
@@ -111,6 +113,18 @@ export function getRunPayload(runId: string): RunPayload | null {
 
   return {
     run: serializeRun(runRow),
+    profileName: (() => {
+      const [p] = db.select().from(profiles).where(eq(profiles.id, runRow.profileId)).all();
+      const parsed = p ? (p.structuredJson as unknown as StructuredProfile) : null;
+      return parsed?.contact?.name ?? runRow.profileId;
+    })(),
+    jdTitle: (() => {
+      const [j] = db.select().from(jobDescriptions).where(eq(jobDescriptions.id, runRow.jdId)).all();
+      const parsed = j ? (j.parsedJson as unknown as ParsedJd) : null;
+      return parsed?.requiredSkills?.length
+        ? `${parsed.experienceLevel} — ${parsed.requiredSkills.slice(0, 3).join(', ')}`
+        : runRow.jdId;
+    })(),
     drafts: draftPayloads,
     claims: claimRows
       .map((c) => ({
