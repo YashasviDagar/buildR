@@ -9,19 +9,19 @@ import {
 export function normalizeProfile(input: unknown): StructuredProfile {
   const parsed = structuredProfileSchema.parse(input);
 
-  const counters = { experience: 0, education: 0, projects: 0, skills: 0 };
+  const counters = { exp: 0, edu: 0, prj: 0, skl: 0 };
   const seenIds = new Set<string>();
-  const assign = (prefix: string) => {
+  const assign = (prefix: keyof typeof counters) => {
     let id: string;
     do {
-      counters[prefix as keyof typeof counters] += 1;
-      id = `${prefix}_${counters[prefix as keyof typeof counters]}`;
+      counters[prefix] += 1;
+      id = `${prefix}_${counters[prefix]}`;
     } while (seenIds.has(id));
     seenIds.add(id);
     return id;
   };
 
-  const claim = (existing: string | undefined, prefix: string): string => {
+  const claim = (existing: string | undefined, prefix: keyof typeof counters): string => {
     if (existing) {
       if (seenIds.has(existing)) return assign(prefix);
       seenIds.add(existing);
