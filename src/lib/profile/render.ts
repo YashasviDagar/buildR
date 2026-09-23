@@ -1,6 +1,4 @@
-import type { ParsedJd, StructuredProfile, GeneratedSection } from '../../types.js';
-import type { ProfileItem } from '../../types.js';
-import type { StructuredProfile as Profile } from '../../types.js';
+import type { ParsedJd, GeneratedSection, ProfileItem, StructuredProfile } from '../../types.js';
 
 // Render a single profile item verbatim — this exact string is what the
 // verifier sees as the claimed source, so it must be complete and faithful.
@@ -49,7 +47,7 @@ export function renderProfileItemContent(item: ProfileItem): string {
 // scorer and the simulated parser see. Includes the deterministic contact
 // header generated from profile contact data (not from the LLM).
 export function renderDraftText(
-  profile: Profile,
+  profile: StructuredProfile,
   sections: GeneratedSection[],
 ): string {
   const c = profile.contact;
