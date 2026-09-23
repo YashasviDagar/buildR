@@ -8,7 +8,7 @@ export function normalizeText(text: string): string {
   return text
     .toLowerCase()
     .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .replace(/[^a-z0-9+#./-]+/g, ' ')
+    .replace(/[^a-z0-9+#]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -18,22 +18,24 @@ export function splitCamelCase(text: string): string {
 }
 
 // Porter-lite stemmer: deliberately simple, deterministic, good enough for
-// ATS keyword matching where inflection differences are shallow.
+// ATS keyword matching where inflection differences are shallow. A single
+// suffix rule applies, then a final trailing-'e' strip so "managed" and
+// "manage" land on the same stem.
 export function stem(word: string): string {
   let w = word.toLowerCase();
-  if (w.length > 4 && w.endsWith('ies')) return w.slice(0, -3) + 'y';
-  if (w.length > 4 && w.endsWith('sses')) return w.slice(0, -2);
-  if (w.length > 5 && w.endsWith('ing')) return w.slice(0, -3);
-  if (w.length > 4 && w.endsWith('ed') && !/[aeiou]{2}ed$/.test(w)) return w.slice(0, -2);
-  if (w.length > 4 && w.endsWith('es') && !w.endsWith('ses')) return w.slice(0, -2);
-  if (w.length > 3 && w.endsWith('s') && !w.endsWith('ss') && !w.endsWith('us')) return w.slice(0, -1);
+  if (w.length > 4 && w.endsWith('ies')) w = w.slice(0, -3) + 'y';
+  else if (w.length > 4 && w.endsWith('sses')) w = w.slice(0, -2);
+  else if (w.length > 5 && w.endsWith('ing')) w = w.slice(0, -3);
+  else if (w.length > 4 && w.endsWith('ed') && !/[aeiou]{2}ed$/.test(w)) w = w.slice(0, -2);
+  else if (w.length > 4 && w.endsWith('es') && !w.endsWith('ses')) w = w.slice(0, -2);
+  else if (w.length > 3 && w.endsWith('s') && !w.endsWith('ss') && !w.endsWith('us')) w = w.slice(0, -1);
+  if (w.length > 4 && w.endsWith('e')) w = w.slice(0, -1);
   return w;
 }
 
 export function tokenize(text: string): string[] {
   return normalizeText(text)
     .split(' ')
-    .map((t) => t.replace(/^[./-]+|[./-]+$/g, ''))
     .filter((t) => t.length > 0 && !STOPWORDS.has(t));
 }
 
@@ -79,9 +81,7 @@ export function looksLikeTable(text: string): boolean {
   let pipeRowCount = 0;
   for (const line of lines) {
     const trimmed = line.trim();
-    if (trimmed.startsWith('|') || (trimmed.includes('|') && (trimmed.match(/\|/g)?.length ?? 0) >= 2)) {
-      pipeRowCount++;
-    } else if (/\t.*\t/.test(line)) {
+    if (trimmed.startsWith('|') || trimmed.includes('|') || /\t.*\t/.test(line)) {
       pipeRowCount++;
     }
   }

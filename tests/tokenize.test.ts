@@ -16,13 +16,15 @@ describe('stem', () => {
     ['developed', 'develop'],
     ['developing', 'develop'],
     ['builds', 'build'],
-    ['analyses', 'analyse'], // ies -> y
-    ['processes', 'process'], // sses -> ss? -> processes -> process
-    ['classes', 'clas'], // conservative suffix strip
+    ['analyses', 'analys'], // s-strip + trailing-e strip aligns with analyse
+    ['analyse', 'analys'],
+    ['processes', 'process'], // sses -> ss
+    ['classes', 'class'],
     ['react', 'react'],
     ['sass', 'sass'],
     ['status', 'status'],
-    ['managed', 'manage'],
+    ['managed', 'manag'],
+    ['manage', 'manag'], // trailing-e strip aligns with managed
     ['testing', 'test'],
     ['skills', 'skill'],
     ['tests', 'test'],
@@ -43,8 +45,8 @@ describe('tokenize', () => {
     expect(tokenize('GraphQL and TypeScript')).toContain('graph ql'.replace(' ', ''));
   });
 
-  it('strips leading/trailing punctuation like react.js', () => {
-    expect(tokenize('react.js and node.js')).toEqual(['react', 'node']);
+  it('splits dotted skill names like react.js', () => {
+    expect(tokenize('react.js and node.js')).toEqual(['react', 'js', 'node', 'js']);
   });
 });
 
