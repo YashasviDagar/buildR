@@ -1,0 +1,14 @@
+node_modules/
+.next/
+dist/
+coverage/
+
+buildr.db
+buildr.db-journal
+*.db-shm
+*.db-wal
+
+# environment — only .env.example is committed, never real secrets
+.env
+.env.local
+.env.*.local
