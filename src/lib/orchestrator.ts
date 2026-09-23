@@ -55,7 +55,7 @@ export interface RunResult {
 //   INIT -> (GENERATE -> SCORE -> VERIFY -> STOP-CHECK -> REVISE)* -> DONE
 // Stops on whichever comes first (spec order): score plateau, 4 iterations,
 // or a fully supported draft; plus a quality guard: nothing left to revise.
-export async function runPipeline(profileId: string, jdId: string): Promise<RunResult> {
+export async function runPipeline(profileId: string, jdId: string, runId?: string): Promise<RunResult> {
   // --- INIT -------------------------------------------------------------
   const [profileRow] = await db.select().from(profiles).where(eq(profiles.id, profileId));
   if (!profileRow) throw new Error(`Profile ${profileId} not found`);
@@ -67,8 +67,37 @@ export async function runPipeline(profileId: string, jdId: string): Promise<RunR
   const jdRaw = jdRow.rawText;
   const embedder = getEmbeddingProvider();
 
-  const runId = nanoid();
-  await db.insert(runs).values({ id: runId, profileId, jdId, status: 'running' });
+  const id = runId ?? nanoid();
+  await db.insert(runs).values({ id, profileId, jdId, status: 'running' });
+
+  try {
+    return await loop(id, profileId, jdId, profile, jd, jdRaw, embedder);
+  } catch (err) {
+    // A crashed run never converged: persist the failure for the UI/eval.
+    await db
+      .update(runs)
+      .set({ status: 'failed', converged: false })
+      .where(eq(runs.id, id));
+    throw err;
+  }
+}
+
+// Fire-and-forget entrypoint for the UI: the runs row already exists (so the
+// run detail page can poll immediately), the pipeline just fills it in.
+export async function runPipelineWithExistingRun(
+  runId: string,
+  profileId: string,
+  jdId: string,
+): Promise<RunResult> {
+  const [profileRow] = await db.select().from(profiles).where(eq(profiles.id, profileId));
+  if (!profileRow) throw new Error(`Profile ${profileId} not found`);
+  const [jdRow] = await db.select().from(jobDescriptions).where(eq(jobDescriptions.id, jdId));
+  if (!jdRow) throw new Error(`Job description ${jdId} not found`);
+
+  const profile = profileRow.structuredJson as unknown as StructuredProfile;
+  const jd = jdRow.parsedJson as unknown as ParsedJd;
+  const jdRaw = jdRow.rawText;
+  const embedder = getEmbeddingProvider();
 
   try {
     return await loop(runId, profileId, jdId, profile, jd, jdRaw, embedder);
@@ -101,10 +130,6 @@ function mergeSections(
     if (keptSection) merged.push(keptSection);
   }
   return merged;
-}
-
-function flatten(sections: GeneratedSection[]): FlatBullet[] {
-  return sections.flatMap((s) => s.bullets.map((b) => ({ section: s.section, ...b })));
 }
 
 async function loop(
