@@ -1,0 +1,35 @@
+{
+  "name": "buildr",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Agentic ATS resume optimization system with claim-level verification",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "import:profile": "tsx scripts/import-profile.ts",
+    "parse:jd": "tsx scripts/parse-jd.ts",
+    "pipeline": "tsx scripts/run-pipeline.ts"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^2.0.0",
+    "ai": "^5.0.0",
+    "better-sqlite3": "^12.4.1",
+    "drizzle-orm": "^0.44.0",
+    "nanoid": "^5.1.5",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.0.0",
+    "drizzle-kit": "^0.31.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.2.0"
+  }
+}
