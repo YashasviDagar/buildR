@@ -49,9 +49,18 @@ describe('structureScore', () => {
   });
 
   it('penalizes wrong section order', () => {
-    const wrongOrder = fullResume
-      .replace(/Professional Experience[\s\S]*?(?=Projects)/, '')
-      .replace('Technical Skills', 'Technical Skills\nSoftware Engineer at Bright Systems');
+    const wrongOrder = `Ananya Rao
+ananya.rao@example.com | +1 415 555 2671
+
+Technical Skills
+React, TypeScript
+
+Education
+B.Tech, Computer Science, IIT Delhi, 2022
+
+Professional Experience
+Software Engineer, Bright Systems
+- Built the checkout flow in React`;
     const result = structureScore(wrongOrder);
     expect(result.checks.find((c) => c.name === 'section-order')?.passed).toBe(false);
   });

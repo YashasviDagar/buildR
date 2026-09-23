@@ -33,7 +33,7 @@ describe('keywordCoverage', () => {
 
   it('reports missed terms with original casing preserved', () => {
     const result = keywordCoverage('nothing relevant here', jd);
-    expect(result.nice.missed.sort()).toEqual(['accessibility', 'graphql']);
+    expect(result.nice.missed.sort()).toEqual(['accessibility', 'graphql', 'rest apis']);
   });
 
   it('gives 100 coverage for an empty must list', () => {
