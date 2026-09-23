@@ -1,0 +1,68 @@
+{
+  "contact": {
+    "name": "Ananya Rao",
+    "email": "ananya.rao@example.com",
+    "phone": "+1 415 555 2671",
+    "location": "San Francisco, CA",
+    "links": ["github.com/ananyarao"]
+  },
+  "summary": "Frontend engineer with 3 years of experience building React and TypeScript web applications.",
+  "experience": [
+    {
+      "title": "Software Engineer",
+      "org": "Bright Systems",
+      "startDate": "2023-06",
+      "endDate": "present",
+      "location": "San Francisco, CA",
+      "highlights": [
+        "Built the customer checkout flow in React and TypeScript",
+        "Wrote integration tests for the payments API using Vitest",
+        "Improved accessibility of the design system components"
+      ]
+    },
+    {
+      "title": "Software Engineer Intern",
+      "org": "Lumen Labs",
+      "startDate": "2022-05",
+      "endDate": "2022-08",
+      "highlights": [
+        "Built internal dashboards with Node.js and Express"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "degree": "B.Tech, Computer Science",
+      "school": "IIT Delhi",
+      "year": "2022"
+    }
+  ],
+  "projects": [
+    {
+      "name": "FieldNotes",
+      "description": "Offline-first note taking app for field researchers",
+      "tech": ["React", "IndexedDB", "service workers"],
+      "highlights": [
+        "Implemented offline sync with IndexedDB and service workers",
+        "Published as an installable PWA"
+      ]
+    },
+    {
+      "name": "QuizWhiz",
+      "description": "Realtime quiz platform for classrooms",
+      "tech": ["WebSockets", "Node.js", "Redis"],
+      "highlights": [
+        "Built realtime scoring with WebSockets and Redis pub/sub"
+      ]
+    }
+  ],
+  "skills": [
+    { "name": "React", "category": "frontend", "level": "advanced" },
+    { "name": "TypeScript", "category": "languages", "level": "advanced" },
+    { "name": "JavaScript", "category": "languages", "level": "advanced" },
+    { "name": "Node.js", "category": "backend", "level": "intermediate" },
+    { "name": "SQL", "category": "data", "level": "intermediate" },
+    { "name": "Vitest", "category": "testing", "level": "intermediate" },
+    { "name": "Git", "category": "tooling", "level": "advanced" }
+  ]
+}
