@@ -1,0 +1,26 @@
+Senior Frontend Engineer — Platform Team (Remote)
+
+We are looking for a senior frontend engineer to own our customer-facing web platform. You will lead the migration of our legacy UI to a modern stack, drive performance and accessibility standards, and mentor mid-level engineers.
+
+Responsibilities:
+- Build and maintain large-scale React applications with TypeScript
+- Own end-to-end feature delivery: design reviews, implementation, testing, deployment
+- Improve Core Web Vitals and page performance across the product
+- Establish automated testing practices (unit, integration, e2e) in CI/CD pipelines
+- Participate in architecture decisions and code reviews
+- Mentor junior and mid-level engineers
+
+Required qualifications:
+- 5+ years of professional frontend experience
+- Expert-level React and TypeScript
+- Strong experience with performance optimization and Core Web Vitals
+- Experience setting up and maintaining CI/CD pipelines
+- Track record of writing automated tests (unit, integration, e2e)
+
+Nice to have:
+- Experience with GraphQL
+- Familiarity with design systems and accessibility (WCAG)
+- Experience mentoring engineers
+- Contributions to open source
+
+We offer a collaborative, remote-first culture with a strong engineering bar.
