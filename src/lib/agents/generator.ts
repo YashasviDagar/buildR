@@ -135,11 +135,11 @@ function buildUserPrompt(input: GeneratorInput): string {
 
   if (input.regenerateSections && input.regenerateSections.length > 0) {
     parts.push(
-      `## Sections to REGENERATE (replace entirely): ${input.regenerateSections.join(', ')}`,
+      `## Sections to REGENERATE (your output must contain ONLY these sections, fully rewritten): ${input.regenerateSections.join(', ')}`,
     );
     if (input.keepSections && input.keepSections.length > 0) {
       parts.push(
-        `## Sections to KEEP EXACTLY AS-IS (copy verbatim, do not modify):\n${JSON.stringify(input.keepSections, null, 2)}`,
+        `## Sections NOT to output (kept by the system as-is; shown only so you do not duplicate them):\n${JSON.stringify(input.keepSections, null, 2)}`,
       );
     }
   }
