@@ -7,18 +7,29 @@ import type {
   ParsedJd,
   RejectionFeedback,
   StructuredProfile,
-  Verdict,
 } from '../types.js';
 import { generateDraft } from './agents/generator.js';
 import { verifyBullets, type VerifiedBullet } from './agents/verifier.js';
 import { scoreDraft, type ScoreBreakdown } from './scoring/index.js';
 import { getEmbeddingProvider } from './embed.js';
-import { renderDraftText, renderJdText } from './profile/render.js';
+import { renderDraftText } from './profile/render.js';
+import {
+  claimHash,
+  countVerdicts,
+  planRevision,
+  type FlatBullet,
+  type SeenVerdict,
+} from './revision.js';
 
 const MAX_ITERATIONS = 4;
 const MIN_SCORE_IMPROVEMENT = 2;
+const SECTION_ORDER = ['experience', 'projects', 'education', 'skills'];
 
-export type StopReason = 'clean' | 'score_plateau' | 'max_iterations';
+export type StopReason =
+  | 'clean'
+  | 'score_plateau'
+  | 'max_iterations'
+  | 'nothing_to_revise';
 
 export interface IterationRecord {
   iteration: number;
@@ -40,21 +51,10 @@ export interface RunResult {
   finalIteration: number;
 }
 
-interface SeenVerdict {
-  verdict: Verdict;
-  justification: string;
-}
-
-// Claim hash: identical (section, text, sourceItemId) triples carry their
-// prior verdict forward without a new verifier call — this is the cost guard.
-function claimHash(section: string, text: string, sourceItemId: string): string {
-  return `${section}::${text.trim().toLowerCase()}::${sourceItemId}`;
-}
-
 // Plain readable state machine:
 //   INIT -> (GENERATE -> SCORE -> VERIFY -> STOP-CHECK -> REVISE)* -> DONE
 // Stops on whichever comes first (spec order): score plateau, 4 iterations,
-// or a fully supported draft.
+// or a fully supported draft; plus a quality guard: nothing left to revise.
 export async function runPipeline(profileId: string, jdId: string): Promise<RunResult> {
   // --- INIT -------------------------------------------------------------
   const [profileRow] = await db.select().from(profiles).where(eq(profiles.id, profileId));
@@ -73,9 +73,38 @@ export async function runPipeline(profileId: string, jdId: string): Promise<RunR
   try {
     return await loop(runId, profileId, jdId, profile, jd, jdRaw, embedder);
   } catch (err) {
-    await db.update(runs).set({ status: 'failed' }).where(eq(runs.id, runId));
+    // A crashed run never converged: persist the failure for the UI/eval.
+    await db
+      .update(runs)
+      .set({ status: 'failed', converged: false })
+      .where(eq(runs.id, runId));
     throw err;
   }
+}
+
+// Merge regenerated sections with verbatim-kept sections in CODE, not by
+// trusting the generator to copy. Canonical section order is preserved.
+function mergeSections(
+  regenerated: GeneratedSection[],
+  kept: GeneratedSection[],
+): GeneratedSection[] {
+  const keptBySection = new Map(kept.map((s) => [s.section, s]));
+  const merged: GeneratedSection[] = [];
+  const sections = new Set([...SECTION_ORDER, ...regenerated.map((s) => s.section)]);
+  for (const section of sections) {
+    const fromRegen = regenerated.find((s) => s.section === section);
+    if (fromRegen && fromRegen.bullets.length > 0) {
+      merged.push(fromRegen);
+      continue;
+    }
+    const keptSection = keptBySection.get(section);
+    if (keptSection) merged.push(keptSection);
+  }
+  return merged;
+}
+
+function flatten(sections: GeneratedSection[]): FlatBullet[] {
+  return sections.flatMap((s) => s.bullets.map((b) => ({ section: s.section, ...b })));
 }
 
 async function loop(
@@ -102,6 +131,9 @@ async function loop(
 
   while (stopReason === null) {
     // --- GENERATE ---------------------------------------------------------
+    // On iteration 1 the generator writes all sections. On later passes it
+    // writes ONLY the sections flagged for regeneration; kept sections are
+    // merged back in code (mergeSections) so verbatim copies are guaranteed.
     const generated = await generateDraft({
       jd,
       jdRawText: jdRaw,
@@ -112,7 +144,13 @@ async function loop(
       keepSections: iteration > 1 ? keepSections : undefined,
       regenerateSections: iteration > 1 ? regenerateSections : undefined,
     });
-    const sections = generated.sections;
+
+    const regenOutput =
+      iteration > 1 && regenerateSections.length > 0
+        ? generated.sections.filter((s) => regenerateSections.includes(s.section))
+        : generated.sections;
+    const sections = iteration > 1 ? mergeSections(regenOutput, keepSections) : generated.sections;
+    if (sections.length === 0) throw new Error('generator produced an empty draft');
 
     // --- SCORE ------------------------------------------------------------
     const draftText = renderDraftText(profile, sections);
@@ -148,10 +186,13 @@ async function loop(
     for (const bullet of flat) {
       const prior = seen.get(claimHash(bullet.section, bullet.text, bullet.sourceItemId));
       if (!prior) continue;
-      const isCarried = !verified.some(
-        (v) => claimHash(v.section, v.text, v.sourceItemId) === claimHash(bullet.section, bullet.text, bullet.sourceItemId),
+      const isNew = verified.some(
+        (v) =>
+          v.section === bullet.section &&
+          v.text === bullet.text &&
+          v.sourceItemId === bullet.sourceItemId,
       );
-      if (isCarried) carriedOver++;
+      if (!isNew) carriedOver++;
       claimRows.push({
         id: nanoid(),
         draftId,
@@ -159,7 +200,7 @@ async function loop(
         text: bullet.text,
         sourceItemId: bullet.sourceItemId,
         verdict: prior.verdict,
-        justification: isCarried ? `${prior.justification} (carried over — bullet unchanged)` : prior.justification,
+        justification: isNew ? prior.justification : `${prior.justification} (carried over — bullet unchanged)`,
       });
     }
     for (const drop of generated.droppedUnresolved) {
@@ -175,12 +216,7 @@ async function loop(
     }
     if (claimRows.length > 0) await db.insert(claims).values(claimRows);
 
-    const verdictCounts = { supported: 0, partial: 0, unsupported: 0 };
-    for (const bullet of flat) {
-      const v = seen.get(claimHash(bullet.section, bullet.text, bullet.sourceItemId));
-      if (!v) continue;
-      verdictCounts[v.verdict === 'SUPPORTED' ? 'supported' : v.verdict === 'PARTIAL' ? 'partial' : 'unsupported']++;
-    }
+    const verdictCounts = countVerdicts(flat, seen);
 
     records.push({
       iteration,
@@ -193,7 +229,7 @@ async function loop(
       carriedOver,
     });
 
-    // --- STOP CHECKS (first match wins, spec order) ------------------------
+    // --- STOP CHECKS (first match wins; spec order first, then guard) ------
     if (iteration >= 2 && score.total - priorScore < MIN_SCORE_IMPROVEMENT) {
       stopReason = 'score_plateau';
       lastScore = score.total;
@@ -210,38 +246,28 @@ async function loop(
       break;
     }
 
-    // --- REVISE -------------------------------------------------------------
-    const nextRejections: RejectionFeedback[] = [];
-    const sectionsToRegen = new Set<string>();
+    // --- REVISE (pure planning logic) ---------------------------------------
+    const plan = planRevision({
+      flat,
+      verdicts: seen,
+      sanitizerDrops: generated.droppedUnresolved,
+      partialAttemptedSections,
+    });
 
-    for (const bullet of flat) {
-      const v = seen.get(claimHash(bullet.section, bullet.text, bullet.sourceItemId));
-      if (!v) continue;
-      if (v.verdict === 'UNSUPPORTED') {
-        sectionsToRegen.add(bullet.section);
-        nextRejections.push({ section: bullet.section, text: bullet.text, reason: v.justification });
-      } else if (v.verdict === 'PARTIAL' && !partialAttemptedSections.has(bullet.section)) {
-        // PARTIAL bullets get exactly one rewrite attempt, per section.
-        sectionsToRegen.add(bullet.section);
-        partialAttemptedSections.add(bullet.section);
-        nextRejections.push({
-          section: bullet.section,
-          text: bullet.text,
-          reason: `PARTIAL — narrow the claim to what the cited source actually supports: ${v.justification}`,
-        });
-      }
-      // Persistent PARTIAL after its one rewrite attempt is accepted as-is.
+    // Guard: verdicts not clean but nothing to regenerate (e.g. only accepted
+    // PARTIALs remain) — the draft is stable; iterating further would just
+    // churn tokens. Treat as a quality stop.
+    if (!plan.hasRegeneration) {
+      stopReason = 'nothing_to_revise';
+      lastScore = score.total;
+      break;
     }
 
-    // Sanitizer-dropped fabrications always feed back, regardless of verdicts.
-    for (const drop of generated.droppedUnresolved) {
-      sectionsToRegen.add(drop.section);
-      nextRejections.push(drop);
-    }
-
-    keepSections = sections.filter((s) => !sectionsToRegen.has(s.section));
-    regenerateSections = [...sectionsToRegen];
-    rejectionLog = nextRejections;
+    partialAttemptedSections.clear();
+    for (const s of plan.partialAttemptedSections) partialAttemptedSections.add(s);
+    keepSections = sections.filter((s) => !plan.regenerateSections.includes(s.section));
+    regenerateSections = plan.regenerateSections;
+    rejectionLog = plan.rejectionLog;
     priorScore = score.total;
     priorBreakdown = score.breakdown;
     iteration++;
