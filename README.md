@@ -55,7 +55,16 @@ Scoring is covered by offline deterministic tests (a mock embedder stands in for
 ## Development
 
 ```bash
-npm run dev     # Next.js
+npm run dev     # Next.js on http://localhost:3000
 ```
+
+### UI walkthrough
+
+1. **Import a profile** — `/profiles/new`: paste profile JSON (or load the sample); live Zod validation, stable item ids assigned on save.
+2. **Parse a JD** — `/jds/new`: paste the posting; the parser agent splits must-have vs nice-to-have (this split drives the scoring weights).
+3. **Start a run** — dashboard launcher: pick profile + JD, the loop runs fire-and-forget and the run page polls every 1.5s.
+4. **Watch it** — `/runs/[id]` shows the score-per-iteration chart, verdict stacked bars, component breakdowns, the full claims log with verifier justifications, and an annotated resume preview (toggle annotations off for the clean ATS view).
+
+Run phase reports live in `phases/` — one markdown file per completed phase describing what was built and how it was verified.
 
 See `plan.md` for the full architecture, data model, agent specifications, and build order.
