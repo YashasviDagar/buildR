@@ -24,6 +24,7 @@ export const drafts = sqliteTable(
   'drafts',
   {
     id: text('id').primaryKey(),
+    runId: text('run_id'),
     profileId: text('profile_id').notNull(),
     jdId: text('jd_id').notNull(),
     iteration: integer('iteration').notNull(),
@@ -32,7 +33,7 @@ export const drafts = sqliteTable(
     scoreBreakdownJson: text('score_breakdown_json').notNull(),
     createdAt: createdAt(),
   },
-  (t) => [index('drafts_profile_jd_idx').on(t.profileId, t.jdId)],
+  (t) => [index('drafts_profile_jd_idx').on(t.profileId, t.jdId), index('drafts_run_idx').on(t.runId)],
 );
 
 export const claims = sqliteTable(
