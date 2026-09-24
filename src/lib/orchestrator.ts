@@ -202,6 +202,7 @@ async function loop(
     const draftId = nanoid();
     await db.insert(drafts).values({
       id: draftId,
+      runId,
       profileId,
       jdId,
       iteration,
