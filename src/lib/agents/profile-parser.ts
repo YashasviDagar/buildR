@@ -1,8 +1,8 @@
 import { generateObject } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 import { z } from 'zod';
-import { structuredProfileSchema, type StructuredProfile } from '../../types.js';
-import { normalizeProfile } from '../profile/normalize.js';
+import { structuredProfileSchema, type StructuredProfile } from '../../types';
+import { normalizeProfile } from '../profile/normalize';
 
 const MODEL_ID = 'gpt-4o-mini';
 
