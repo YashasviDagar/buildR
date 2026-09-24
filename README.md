@@ -38,6 +38,9 @@ npx tsx scripts/import-profile.ts profile.json --sample
 # Parse a job description
 npx tsx scripts/parse-jd.ts jd.txt --sample
 
+# Import freeform resume text (LLM structuring, needs OPENAI_API_KEY)
+npx tsx scripts/import-profile.ts --raw resume.txt
+
 # Run the full pipeline: generate → score → verify → revise
 npx tsx scripts/run-pipeline.ts <profileId> <jdId>
 ```
@@ -50,7 +53,7 @@ npx tsx scripts/run-pipeline.ts <profileId> <jdId>
 npx vitest
 ```
 
-Scoring is covered by offline deterministic tests (a mock embedder stands in for the API under test).
+Scoring is covered by offline deterministic tests (a mock embedder stands in for the API under test). The full orchestrator revision loop is exercised end-to-end with scripted mock agents against a temp database — `tests/orchestrator.test.ts`.
 
 ## Development
 
@@ -60,7 +63,7 @@ npm run dev     # Next.js on http://localhost:3000
 
 ### UI walkthrough
 
-1. **Import a profile** — `/profiles/new`: paste profile JSON (or load the sample); live Zod validation, stable item ids assigned on save.
+1. **Import a profile** — `/profiles/new`: paste structured JSON, load the sample, or paste freeform resume text for LLM extraction; live Zod validation, stable item ids assigned on save.
 2. **Parse a JD** — `/jds/new`: paste the posting; the parser agent splits must-have vs nice-to-have (this split drives the scoring weights).
 3. **Start a run** — dashboard launcher: pick profile + JD, the loop runs fire-and-forget and the run page polls every 1.5s.
 4. **Watch it** — `/runs/[id]` shows the score-per-iteration chart, verdict stacked bars, component breakdowns, the full claims log with verifier justifications, and an annotated resume preview (toggle annotations off for the clean ATS view).
