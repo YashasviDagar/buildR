@@ -1,10 +1,10 @@
-import type { ParsedJd } from '../../types.js';
-import type { EmbeddingProvider } from '../embed.js';
-import { keywordCoverage, round2 } from './keyword.js';
-import { structureScore } from './structure.js';
-import { parseabilityScore } from './parseability.js';
-import { semanticScore } from './semantic.js';
-import { SCORE_WEIGHTS } from './weights.js';
+import type { ParsedJd } from '../../types';
+import type { EmbeddingProvider } from '../embed';
+import { keywordCoverage, round2 } from './keyword';
+import { structureScore } from './structure';
+import { parseabilityScore } from './parseability';
+import { semanticScore } from './semantic';
+import { SCORE_WEIGHTS } from './weights';
 
 export interface ScoreBreakdown {
   keywordMust: number;

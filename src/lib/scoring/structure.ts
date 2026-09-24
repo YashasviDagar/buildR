@@ -1,4 +1,4 @@
-import { findEmail, findPhone, looksLikeTable, stemTokens } from '../tokenize.js';
+import { findEmail, findPhone, looksLikeTable, stemTokens } from '../tokenize';
 
 export interface StructureScore {
   score: number; // 0-100

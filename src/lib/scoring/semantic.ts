@@ -1,5 +1,5 @@
-import type { EmbeddingProvider } from '../embed.js';
-import { cosineSimilarity } from '../embed.js';
+import type { EmbeddingProvider } from '../embed';
+import { cosineSimilarity } from '../embed';
 
 // Semantic similarity between draft and JD as cosine similarity of their
 // embeddings, rescaled from [-1, 1] to [0, 100] (negatives clamp to 0).

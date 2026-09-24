@@ -1,4 +1,4 @@
-import type { RejectionFeedback, Verdict } from '../types.js';
+import type { RejectionFeedback, Verdict } from '../types';
 
 // Pure revision-planning logic, extracted from the orchestrator so the stop /
 // regenerate decisions are unit-testable without an LLM or database.

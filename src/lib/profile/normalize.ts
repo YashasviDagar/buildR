@@ -1,7 +1,7 @@
 import {
   structuredProfileSchema,
   type StructuredProfile,
-} from '../../types.js';
+} from '../../types';
 
 // Normalize an incoming profile (user JSON or LLM output) into the canonical
 // stored form: Zod-validated, every item carrying a stable unique itemId

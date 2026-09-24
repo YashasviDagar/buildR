@@ -5,9 +5,9 @@ import {
   type ProfileItem,
   type StructuredProfile,
   type VerdictResult,
-} from '../../types.js';
-import { getProfileItem } from '../profile/normalize.js';
-import { renderProfileItemContent } from '../profile/render.js';
+} from '../../types';
+import { getProfileItem } from '../profile/normalize';
+import { renderProfileItemContent } from '../profile/render';
 
 const MODEL_ID = 'gpt-4o-mini';
 

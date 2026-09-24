@@ -6,8 +6,8 @@ import {
   type ParsedJd,
   type RejectionFeedback,
   type StructuredProfile,
-} from '../../types.js';
-import { getProfileItem, normalizeProfile } from '../profile/normalize.js';
+} from '../../types';
+import { getProfileItem, normalizeProfile } from '../profile/normalize';
 
 const MODEL_ID = 'gpt-4o-mini';
 

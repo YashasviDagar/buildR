@@ -1,8 +1,8 @@
 import { eq, desc, inArray } from 'drizzle-orm';
-import { db } from '@/db/client.js';
-import { claims, drafts, jobDescriptions, profiles, runs } from '@/db/schema.js';
-import type { GeneratedSection, ParsedJd, StructuredProfile, Verdict } from '@/types.js';
-import type { ScoreBreakdown } from '@/lib/scoring/index.js';
+import { db } from '@/db/client';
+import { claims, drafts, jobDescriptions, profiles, runs } from '@/db/schema';
+import type { GeneratedSection, ParsedJd, StructuredProfile, Verdict } from '@/types';
+import type { ScoreBreakdown } from '@/lib/scoring/index';
 
 export interface RunSummary {
   id: string;
@@ -44,10 +44,19 @@ export interface RunPayload {
   claims: ClaimPayload[];
 }
 
+// JSON columns are stored as TEXT — always parse on read.
+export function parseStoredProfile(json: string): StructuredProfile {
+  return JSON.parse(json) as StructuredProfile;
+}
+
+export function parseStoredJd(json: string): ParsedJd {
+  return JSON.parse(json) as ParsedJd;
+}
+
 export function listProfiles(): { id: string; name: string; itemCount: number; createdAt: string }[] {
   const rows = db.select().from(profiles).orderBy(desc(profiles.createdAt)).all();
   return rows.map((row) => {
-    const parsed = row.structuredJson as unknown as StructuredProfile;
+    const parsed = parseStoredProfile(row.structuredJson);
     return {
       id: row.id,
       name: parsed.contact?.name ?? row.id,
@@ -64,7 +73,7 @@ export function listProfiles(): { id: string; name: string; itemCount: number; c
 export function listJds(): { id: string; title: string; createdAt: string }[] {
   const rows = db.select().from(jobDescriptions).orderBy(desc(jobDescriptions.createdAt)).all();
   return rows.map((row) => {
-    const parsed = row.parsedJson as unknown as ParsedJd;
+    const parsed = parseStoredJd(row.parsedJson);
     const firstSkill = parsed.requiredSkills?.[0];
     return {
       id: row.id,
@@ -115,12 +124,12 @@ export function getRunPayload(runId: string): RunPayload | null {
     run: serializeRun(runRow),
     profileName: (() => {
       const [p] = db.select().from(profiles).where(eq(profiles.id, runRow.profileId)).all();
-      const parsed = p ? (p.structuredJson as unknown as StructuredProfile) : null;
+      const parsed = p ? parseStoredProfile(p.structuredJson) : null;
       return parsed?.contact?.name ?? runRow.profileId;
     })(),
     jdTitle: (() => {
       const [j] = db.select().from(jobDescriptions).where(eq(jobDescriptions.id, runRow.jdId)).all();
-      const parsed = j ? (j.parsedJson as unknown as ParsedJd) : null;
+      const parsed = j ? parseStoredJd(j.parsedJson) : null;
       return parsed?.requiredSkills?.length
         ? `${parsed.experienceLevel} — ${parsed.requiredSkills.slice(0, 3).join(', ')}`
         : runRow.jdId;

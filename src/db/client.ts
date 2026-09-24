@@ -2,7 +2,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
-import * as schema from './schema.js';
+import * as schema from './schema';
 
 function resolveDbPath(): string {
   const raw = process.env.DATABASE_URL?.replace(/^file:/, '') ?? 'buildr.db';

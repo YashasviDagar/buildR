@@ -1,6 +1,6 @@
 import { embedMany } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
-import { stemTokens, tokenize } from './tokenize.js';
+import { stemTokens, tokenize } from './tokenize';
 
 export interface EmbeddingProvider {
   name: string;

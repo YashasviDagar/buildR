@@ -1,25 +1,25 @@
 import { nanoid } from 'nanoid';
 import { eq } from 'drizzle-orm';
-import { db } from '../db/client.js';
-import { claims, drafts, jobDescriptions, profiles, runs } from '../db/schema.js';
+import { db } from '../db/client';
+import { claims, drafts, jobDescriptions, profiles, runs } from '../db/schema';
 import type {
   GeneratedSection,
   ParsedJd,
   RejectionFeedback,
   StructuredProfile,
-} from '../types.js';
-import { generateDraft } from './agents/generator.js';
-import { verifyBullets, type VerifiedBullet } from './agents/verifier.js';
-import { scoreDraft, type ScoreBreakdown } from './scoring/index.js';
-import { getEmbeddingProvider } from './embed.js';
-import { renderDraftText } from './profile/render.js';
+} from '../types';
+import { generateDraft } from './agents/generator';
+import { verifyBullets, type VerifiedBullet } from './agents/verifier';
+import { scoreDraft, type ScoreBreakdown } from './scoring/index';
+import { getEmbeddingProvider } from './embed';
+import { renderDraftText } from './profile/render';
 import {
   claimHash,
   countVerdicts,
   planRevision,
   type FlatBullet,
   type SeenVerdict,
-} from './revision.js';
+} from './revision';
 
 const MAX_ITERATIONS = 4;
 const MIN_SCORE_IMPROVEMENT = 2;
@@ -62,8 +62,8 @@ export async function runPipeline(profileId: string, jdId: string, runId?: strin
   const [jdRow] = await db.select().from(jobDescriptions).where(eq(jobDescriptions.id, jdId));
   if (!jdRow) throw new Error(`Job description ${jdId} not found`);
 
-  const profile = profileRow.structuredJson as unknown as StructuredProfile;
-  const jd = jdRow.parsedJson as unknown as ParsedJd;
+  const profile = JSON.parse(profileRow.structuredJson) as StructuredProfile;
+  const jd = JSON.parse(jdRow.parsedJson) as ParsedJd;
   const jdRaw = jdRow.rawText;
   const embedder = getEmbeddingProvider();
 
@@ -94,8 +94,8 @@ export async function runPipelineWithExistingRun(
   const [jdRow] = await db.select().from(jobDescriptions).where(eq(jobDescriptions.id, jdId));
   if (!jdRow) throw new Error(`Job description ${jdId} not found`);
 
-  const profile = profileRow.structuredJson as unknown as StructuredProfile;
-  const jd = jdRow.parsedJson as unknown as ParsedJd;
+  const profile = JSON.parse(profileRow.structuredJson) as StructuredProfile;
+  const jd = JSON.parse(jdRow.parsedJson) as ParsedJd;
   const jdRaw = jdRow.rawText;
   const embedder = getEmbeddingProvider();
 

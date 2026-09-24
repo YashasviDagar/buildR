@@ -1,6 +1,6 @@
 import { generateObject } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
-import { parsedJdSchema, type ParsedJd } from '../../types.js';
+import { parsedJdSchema, type ParsedJd } from '../../types';
 
 const MODEL_ID = 'gpt-4o-mini';
 

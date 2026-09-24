@@ -1,5 +1,5 @@
-import { hasHtmlTags, looksLikeTable } from '../tokenize.js';
-import { SECTION_ALIASES as SECTION_ALIASES_FALLBACK } from './structure.js';
+import { hasHtmlTags, looksLikeTable } from '../tokenize';
+import { SECTION_ALIASES as SECTION_ALIASES_FALLBACK } from './structure';
 
 export interface ParseabilityScore {
   score: number; // 0-100

@@ -1,5 +1,5 @@
-import type { ParsedJd } from '../../types.js';
-import { containsKeyword, keywordSignature } from '../tokenize.js';
+import type { ParsedJd } from '../../types';
+import { containsKeyword, keywordSignature } from '../tokenize';
 
 export interface KeywordCoverage {
   coverage: number; // 0-100

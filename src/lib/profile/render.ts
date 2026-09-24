@@ -1,4 +1,4 @@
-import type { ParsedJd, GeneratedSection, ProfileItem, StructuredProfile } from '../../types.js';
+import type { ParsedJd, GeneratedSection, ProfileItem, StructuredProfile } from '../../types';
 
 // Render a single profile item verbatim — this exact string is what the
 // verifier sees as the claimed source, so it must be complete and faithful.
