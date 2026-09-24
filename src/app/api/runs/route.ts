@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
-import { db } from '@/db/client.js';
-import { runs } from '@/db/schema.js';
-import { runPipelineWithExistingRun } from '@/lib/orchestrator.js';
-import { listRuns } from '@/lib/run-payload.js';
+import { db } from '@/db/client';
+import { runs } from '@/db/schema';
+import { runPipelineWithExistingRun } from '@/lib/orchestrator';
+import { listRuns } from '@/lib/run-payload';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;

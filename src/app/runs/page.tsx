@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { listRuns } from '@/lib/run-payload.js';
+import { listRuns } from '@/lib/run-payload';
 
 export const dynamic = 'force-dynamic';
 

@@ -1,4 +1,4 @@
-import { getRunPayload } from '@/lib/run-payload.js';
+import { getRunPayload } from '@/lib/run-payload';
 import { RunDetail } from '@/components/run-detail';
 
 export const dynamic = 'force-dynamic';

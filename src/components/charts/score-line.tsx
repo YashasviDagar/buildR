@@ -9,7 +9,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import type { DraftPayload } from '@/lib/run-payload.js';
+import type { DraftPayload } from '@/lib/run-payload';
 
 export function ScoreLineChart({ drafts }: { drafts: DraftPayload[] }) {
   if (drafts.length === 0) return null;

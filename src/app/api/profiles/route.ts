@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
-import { db } from '@/db/client.js';
-import { profiles } from '@/db/schema.js';
-import { normalizeProfile } from '@/lib/profile/normalize.js';
-import { listProfiles } from '@/lib/run-payload.js';
+import { db } from '@/db/client';
+import { profiles } from '@/db/schema';
+import { normalizeProfile } from '@/lib/profile/normalize';
+import { listProfiles } from '@/lib/run-payload';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';

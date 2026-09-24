@@ -2,12 +2,12 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { structuredProfileSchema, type StructuredProfile } from '@/types.js';
+import { structuredProfileSchema, type StructuredProfile } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs } from '@/components/ui/tabs';
-import { SAMPLE_PROFILE_PATH_HINT } from './sample-hint.js';
+import { SAMPLE_PROFILE_PATH_HINT } from './sample-hint';
 
 export default function NewProfilePage() {
   const router = useRouter();

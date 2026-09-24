@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Card, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { RunLauncher } from '@/components/run-launcher';
-import { listRuns } from '@/lib/run-payload.js';
+import { listRuns } from '@/lib/run-payload';
 
 export const dynamic = 'force-dynamic';
 

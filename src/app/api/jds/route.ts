@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
-import { db } from '@/db/client.js';
-import { jobDescriptions } from '@/db/schema.js';
-import { parseJd } from '@/lib/agents/jd-parser.js';
-import { listJds } from '@/lib/run-payload.js';
+import { db } from '@/db/client';
+import { jobDescriptions } from '@/db/schema';
+import { parseJd } from '@/lib/agents/jd-parser';
+import { listJds } from '@/lib/run-payload';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';

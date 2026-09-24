@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardTitle } from '@/components/ui/card';
-import type { ScoreBreakdown } from '@/lib/scoring/index.js';
+import type { ScoreBreakdown } from '@/lib/scoring/index';
 
 export function KeywordCoveragePanel({ breakdown }: { breakdown?: ScoreBreakdown }) {
   if (!breakdown) {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { ClaimPayload, DraftPayload } from '@/lib/run-payload.js';
+import type { ClaimPayload, DraftPayload } from '@/lib/run-payload';
 import { VerdictBadge, VerdictDot } from '@/components/verdict-badge';
 import { Badge } from '@/components/ui/badge';
 

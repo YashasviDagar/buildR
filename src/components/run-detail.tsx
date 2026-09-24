@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import type { RunPayload } from '@/lib/run-payload.js';
+import type { RunPayload } from '@/lib/run-payload';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardTitle } from '@/components/ui/card';
 import { ScoreLineChart } from '@/components/charts/score-line';

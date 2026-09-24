@@ -1,8 +1,8 @@
 import { eq } from 'drizzle-orm';
 import Link from 'next/link';
-import { db } from '@/db/client.js';
-import { jobDescriptions } from '@/db/schema.js';
-import type { ParsedJd } from '@/types.js';
+import { db } from '@/db/client';
+import { jobDescriptions } from '@/db/schema';
+import { parseStoredJd } from '@/lib/run-payload';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardTitle } from '@/components/ui/card';
 
@@ -15,7 +15,7 @@ export default async function JdPage({ params }: { params: Promise<{ id: string 
     return <p className="text-sm text-[var(--danger)]">Job description {id} not found.</p>;
   }
 
-  const parsed = row.parsedJson as unknown as ParsedJd;
+  const parsed = parseStoredJd(row.parsedJson);
 
   return (
     <div className="flex max-w-3xl flex-col gap-4">
@@ -82,7 +82,7 @@ export default async function JdPage({ params }: { params: Promise<{ id: string 
       <details className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
         <summary className="cursor-pointer text-sm text-[var(--muted)]">Raw job description text</summary>
         <pre className="mt-3 overflow-auto whitespace-pre-wrap text-xs leading-relaxed">{row.rawText}</pre>
-      </Card>
+      </details>
 
       <div className="text-xs text-[var(--muted)]">
         <Link href="/" className="text-[var(--accent)] hover:underline">

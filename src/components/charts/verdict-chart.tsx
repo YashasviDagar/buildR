@@ -10,7 +10,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import type { ClaimPayload, DraftPayload } from '@/lib/run-payload.js';
+import type { ClaimPayload, DraftPayload } from '@/lib/run-payload';
 
 export function VerdictChart({
   drafts,

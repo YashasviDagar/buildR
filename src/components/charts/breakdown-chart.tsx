@@ -10,7 +10,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import type { DraftPayload } from '@/lib/run-payload.js';
+import type { DraftPayload } from '@/lib/run-payload';
 
 const SERIES = [
   { key: 'keywordMust', name: 'must keywords', color: '#3b82f6' },

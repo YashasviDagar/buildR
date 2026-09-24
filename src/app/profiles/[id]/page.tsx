@@ -1,8 +1,9 @@
 import { eq } from 'drizzle-orm';
 import Link from 'next/link';
-import { db } from '@/db/client.js';
-import { profiles } from '@/db/schema.js';
-import type { StructuredProfile } from '@/types.js';
+import { db } from '@/db/client';
+import { profiles } from '@/db/schema';
+import type { StructuredProfile } from '@/types';
+import { parseStoredProfile } from '@/lib/run-payload';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardTitle } from '@/components/ui/card';
 
@@ -15,7 +16,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
     return <p className="text-sm text-[var(--danger)]">Profile {id} not found.</p>;
   }
 
-  const profile = row.structuredJson as unknown as StructuredProfile;
+  const profile = parseStoredProfile(row.structuredJson);
 
   return (
     <div className="flex max-w-3xl flex-col gap-4">

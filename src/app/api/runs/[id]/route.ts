@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getRunPayload } from '@/lib/run-payload.js';
+import { getRunPayload } from '@/lib/run-payload';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
