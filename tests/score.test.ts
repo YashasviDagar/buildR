@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { scoreDraft } from '../src/lib/scoring/index.js';
-import { hashEmbeddingProvider } from '../src/lib/embed.js';
-import { SCORE_WEIGHTS } from '../src/lib/scoring/weights.js';
-import type { ParsedJd } from '../src/types.js';
+import { scoreDraft } from '../src/lib/scoring/index';
+import { hashEmbeddingProvider } from '../src/lib/embed';
+import { SCORE_WEIGHTS } from '../src/lib/scoring/weights';
+import type { ParsedJd } from '../src/types';
 
 const jd: ParsedJd = {
   requiredSkills: ['react', 'typescript'],

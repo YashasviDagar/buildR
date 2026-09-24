@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { hashEmbeddingProvider, cosineSimilarity } from '../src/lib/embed.js';
-import { semanticScore } from '../src/lib/scoring/semantic.js';
+import { hashEmbeddingProvider, cosineSimilarity } from '../src/lib/embed';
+import { semanticScore } from '../src/lib/scoring/semantic';
 
 describe('cosineSimilarity (hand-computed vectors)', () => {
   it('identical unit vectors -> 1', () => {

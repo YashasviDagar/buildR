@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseabilityScore } from '../src/lib/scoring/parseability.js';
+import { parseabilityScore } from '../src/lib/scoring/parseability';
 
 const cleanDraft = `Ananya Rao
 ananya.rao@example.com | +1 415 555 2671

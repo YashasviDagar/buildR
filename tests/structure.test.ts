@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { structureScore } from '../src/lib/scoring/structure.js';
+import { structureScore } from '../src/lib/scoring/structure';
 
 const fullResume = `
 Ananya Rao

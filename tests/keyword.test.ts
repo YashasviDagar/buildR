@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { keywordCoverage } from '../src/lib/scoring/keyword.js';
-import type { ParsedJd } from '../src/types.js';
+import { keywordCoverage } from '../src/lib/scoring/keyword';
+import type { ParsedJd } from '../src/types';
 
 const jd: ParsedJd = {
   requiredSkills: ['react', 'typescript', 'kubernetes'],

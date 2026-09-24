@@ -1,10 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { nanoid } from 'nanoid';
-import { db } from '../src/db/client.js';
-import { profiles } from '../src/db/schema.js';
-import { normalizeProfile } from '../src/lib/profile/normalize.js';
-import { SAMPLE_PROFILE_PATH } from './sample-paths.js';
+import { db } from '../src/db/client';
+import { profiles } from '../src/db/schema';
+import { normalizeProfile } from '../src/lib/profile/normalize';
+import { SAMPLE_PROFILE_PATH } from './sample-paths';
 
 const usage = `Usage: npx tsx scripts/import-profile.ts <profile.json>
        npx tsx scripts/import-profile.ts --sample`;

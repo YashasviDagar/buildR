@@ -1,10 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { nanoid } from 'nanoid';
-import { db } from '../src/db/client.js';
-import { jobDescriptions } from '../src/db/schema.js';
-import { parseJd } from '../src/lib/agents/jd-parser.js';
-import { SAMPLE_JD_PATH } from './sample-paths.js';
+import { db } from '../src/db/client';
+import { jobDescriptions } from '../src/db/schema';
+import { parseJd } from '../src/lib/agents/jd-parser';
+import { SAMPLE_JD_PATH } from './sample-paths';
 
 const usage = `Usage: npx tsx scripts/parse-jd.ts <jd.txt>
        npx tsx scripts/parse-jd.ts --sample

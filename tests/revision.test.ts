@@ -5,7 +5,7 @@ import {
   planRevision,
   type FlatBullet,
   type SeenVerdict,
-} from '../src/lib/revision.js';
+} from '../src/lib/revision';
 
 function verdictsFrom(entries: [string, SeenVerdict['verdict'], string][]): Map<string, SeenVerdict> {
   const map = new Map<string, SeenVerdict>();

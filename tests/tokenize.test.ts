@@ -9,7 +9,7 @@ import {
   normalizeText,
   stem,
   tokenize,
-} from '../src/lib/tokenize.js';
+} from '../src/lib/tokenize';
 
 describe('stem', () => {
   const cases: [string, string][] = [

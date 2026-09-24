@@ -1,8 +1,8 @@
 import { nanoid } from 'nanoid';
 import { eq } from 'drizzle-orm';
-import { db } from '../src/db/client.js';
-import { claims, drafts } from '../src/db/schema.js';
-import { runPipeline } from '../src/lib/orchestrator.js';
+import { db } from '../src/db/client';
+import { claims, drafts } from '../src/db/schema';
+import { runPipeline } from '../src/lib/orchestrator';
 
 const usage = `Usage: npx tsx scripts/run-pipeline.ts <profileId> <jdId>
 
