@@ -95,10 +95,9 @@ export function getRunPayload(runId: string): RunPayload | null {
   const draftRows = db
     .select()
     .from(drafts)
-    .where(eq(drafts.profileId, runRow.profileId))
+    .where(eq(drafts.runId, runRow.id))
     .orderBy(drafts.iteration)
-    .all()
-    .filter((d) => d.jdId === runRow.jdId);
+    .all();
 
   const draftIds = draftRows.map((d) => d.id);
   const claimRows =
