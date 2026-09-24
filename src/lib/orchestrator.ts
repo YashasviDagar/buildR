@@ -8,8 +8,8 @@ import type {
   RejectionFeedback,
   StructuredProfile,
 } from '../types';
-import { generateDraft } from './agents/generator';
-import { verifyBullets, type VerifiedBullet } from './agents/verifier';
+import { generateDraft, type GeneratorInput, type GeneratedDraft } from './agents/generator';
+import { verifyBullets, type VerifierInput, type VerifiedBullet } from './agents/verifier';
 import { scoreDraft, type ScoreBreakdown } from './scoring/index';
 import { getEmbeddingProvider } from './embed';
 import { renderDraftText } from './profile/render';
@@ -51,11 +51,28 @@ export interface RunResult {
   finalIteration: number;
 }
 
+// Injectable agent seam: production wiring uses the real LLM agents; tests
+// inject scripted fakes so the full state machine runs offline.
+export interface PipelineAgents {
+  generate: (input: GeneratorInput) => Promise<GeneratedDraft>;
+  verify: (input: VerifierInput) => Promise<VerifiedBullet[]>;
+}
+
+export const productionAgents: PipelineAgents = {
+  generate: generateDraft,
+  verify: verifyBullets,
+};
+
 // Plain readable state machine:
 //   INIT -> (GENERATE -> SCORE -> VERIFY -> STOP-CHECK -> REVISE)* -> DONE
 // Stops on whichever comes first (spec order): score plateau, 4 iterations,
 // or a fully supported draft; plus a quality guard: nothing left to revise.
-export async function runPipeline(profileId: string, jdId: string, runId?: string): Promise<RunResult> {
+export async function runPipeline(
+  profileId: string,
+  jdId: string,
+  runId?: string,
+  agents: PipelineAgents = productionAgents,
+): Promise<RunResult> {
   // --- INIT -------------------------------------------------------------
   const [profileRow] = await db.select().from(profiles).where(eq(profiles.id, profileId));
   if (!profileRow) throw new Error(`Profile ${profileId} not found`);
@@ -71,7 +88,7 @@ export async function runPipeline(profileId: string, jdId: string, runId?: strin
   await db.insert(runs).values({ id, profileId, jdId, status: 'running' });
 
   try {
-    return await loop(id, profileId, jdId, profile, jd, jdRaw, embedder);
+    return await loop(id, profileId, jdId, profile, jd, jdRaw, embedder, agents);
   } catch (err) {
     // A crashed run never converged: persist the failure for the UI/eval.
     await db
@@ -88,6 +105,7 @@ export async function runPipelineWithExistingRun(
   runId: string,
   profileId: string,
   jdId: string,
+  agents: PipelineAgents = productionAgents,
 ): Promise<RunResult> {
   const [profileRow] = await db.select().from(profiles).where(eq(profiles.id, profileId));
   if (!profileRow) throw new Error(`Profile ${profileId} not found`);
@@ -100,7 +118,7 @@ export async function runPipelineWithExistingRun(
   const embedder = getEmbeddingProvider();
 
   try {
-    return await loop(runId, profileId, jdId, profile, jd, jdRaw, embedder);
+    return await loop(runId, profileId, jdId, profile, jd, jdRaw, embedder, agents);
   } catch (err) {
     // A crashed run never converged: persist the failure for the UI/eval.
     await db
@@ -140,6 +158,7 @@ async function loop(
   jd: ParsedJd,
   jdRaw: string,
   embedder: ReturnType<typeof getEmbeddingProvider>,
+  agents: PipelineAgents,
 ): Promise<RunResult> {
   const seen = new Map<string, SeenVerdict>();
   const partialAttemptedSections = new Set<string>();
@@ -159,7 +178,7 @@ async function loop(
     // On iteration 1 the generator writes all sections. On later passes it
     // writes ONLY the sections flagged for regeneration; kept sections are
     // merged back in code (mergeSections) so verbatim copies are guaranteed.
-    const generated = await generateDraft({
+    const generated = await agents.generate({
       jd,
       jdRawText: jdRaw,
       profile,
@@ -195,7 +214,7 @@ async function loop(
     const flat = sections.flatMap((s) => s.bullets.map((b) => ({ section: s.section, ...b })));
     const toVerify = flat.filter((b) => !seen.has(claimHash(b.section, b.text, b.sourceItemId)));
     const verified: VerifiedBullet[] = toVerify.length
-      ? await verifyBullets({ bullets: toVerify, profile })
+      ? await agents.verify({ bullets: toVerify, profile })
       : [];
 
     for (const v of verified) {
