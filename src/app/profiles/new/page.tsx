@@ -12,6 +12,7 @@ import { SAMPLE_PROFILE_PATH_HINT } from './sample-hint';
 export default function NewProfilePage() {
   const router = useRouter();
   const [jsonText, setJsonText] = useState('');
+  const [rawResume, setRawResume] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,10 +37,29 @@ export default function NewProfilePage() {
       const res = await fetch('/api/profiles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(validation.data),
+        body: JSON.stringify({ structuredJson: validation.data }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'import failed');
+      router.push(`/profiles/${data.id}`);
+    } catch (err) {
+      setError((err as Error).message);
+      setBusy(false);
+    }
+  }
+
+  async function submitRaw() {
+    if (!rawResume.trim()) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/profiles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rawText: rawResume }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? 'extraction failed');
       router.push(`/profiles/${data.id}`);
     } catch (err) {
       setError((err as Error).message);
@@ -107,6 +127,26 @@ export default function NewProfilePage() {
                   </ul>
                 )}
                 {error && <p className="text-xs text-[var(--danger)]">{error}</p>}
+              </div>
+            ),
+          },
+          {
+            value: 'raw',
+            label: 'Paste resume text',
+            content: (
+              <div className="flex flex-col gap-3">
+                <Textarea
+                  value={rawResume}
+                  onChange={(e) => setRawResume(e.target.value)}
+                  placeholder="Paste the full freeform resume text here — the extraction agent structures it (needs OPENAI_API_KEY)…"
+                  className="font-sans"
+                />
+                <div className="flex items-center gap-3">
+                  <Button onClick={submitRaw} disabled={!rawResume.trim() || busy}>
+                    {busy ? 'Extracting…' : 'Extract with LLM'}
+                  </Button>
+                  {rawResume.trim() && <Badge variant="outline">{rawResume.trim().split(/\s+/).length} words</Badge>}
+                </div>
               </div>
             ),
           },
