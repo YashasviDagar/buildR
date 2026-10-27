@@ -9,7 +9,7 @@ import { SAMPLE_JD_PATH } from './sample-paths';
 const usage = `Usage: npx tsx scripts/parse-jd.ts <jd.txt>
        npx tsx scripts/parse-jd.ts --sample
 
-Requires OPENAI_API_KEY in the environment (copy .env.example to .env).`;
+Requires LLM_API_KEY (or OPENAI_API_KEY) (copy .env.example to .env).`;
 
 const arg = process.argv[2];
 if (!arg || arg === '--help' || arg === '-h') {

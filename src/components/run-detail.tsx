@@ -57,6 +57,14 @@ export function RunDetail({ initial, runId }: { initial: RunPayload; runId: stri
         {run.status === 'failed' && <Badge variant="danger">failed</Badge>}
         {run.status === 'done' && run.converged && <Badge variant="success">converged · {run.stopReason}</Badge>}
         {run.status === 'done' && !run.converged && <Badge variant="warning">stopped at cap · {run.stopReason}</Badge>}
+        {run.status === 'done' && (
+          <a
+            href={`/api/runs/${run.id}/pdf`}
+            className="rounded-md bg-[var(--accent)] px-3 py-1 text-xs font-medium text-white hover:opacity-90"
+          >
+            Download PDF
+          </a>
+        )}
         {run.finalScore !== null && (
           <span className="text-sm text-[var(--muted)]">
             final score <span className="font-semibold text-[var(--foreground)]">{run.finalScore}</span>
@@ -115,17 +123,6 @@ export function RunDetail({ initial, runId }: { initial: RunPayload; runId: stri
         </div>
         <div className="flex flex-col gap-4">
           <KeywordCoveragePanel breakdown={latest?.breakdown} />
-          <Card>
-            <CardTitle className="mb-2">Links</CardTitle>
-            <div className="flex flex-col gap-1 text-xs">
-              <Link href={`/profiles/${run.profileId}`} className="text-[var(--accent)] hover:underline">
-                view profile {run.profileId.slice(0, 8)}
-              </Link>
-              <Link href={`/jds/${run.jdId}`} className="text-[var(--accent)] hover:underline">
-                view JD {run.jdId.slice(0, 8)}
-              </Link>
-            </div>
-          </Card>
         </div>
       </div>
 

@@ -1,8 +1,7 @@
 import { generateObject } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
+import { getChatModel } from '../llm';
 import { parsedJdSchema, type ParsedJd } from '../../types';
 
-const MODEL_ID = 'gpt-4o-mini';
 
 const SYSTEM_PROMPT = `You are a meticulous technical recruiter parsing a raw job description into structured data for an ATS resume optimization system.
 
@@ -25,9 +24,8 @@ export interface ParsedJdResult {
 
 // Single-shot JD parser. Not a loop: one generateObject call, temperature 0.
 export async function parseJd(rawText: string): Promise<ParsedJdResult> {
-  const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const { object } = await generateObject({
-    model: openai(MODEL_ID),
+    model: getChatModel(),
     schema: parsedJdSchema,
     system: SYSTEM_PROMPT,
     prompt: rawText,

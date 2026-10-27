@@ -1,10 +1,9 @@
 import { generateObject } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
+import { getChatModel } from '../llm';
 import { z } from 'zod';
 import { structuredProfileSchema, type StructuredProfile } from '../../types';
 import { normalizeProfile } from '../profile/normalize';
 
-const MODEL_ID = 'gpt-4o-mini';
 
 // LLM-facing schema: deliberately lenient (email as plain string) so the model
 // can say "no email present" instead of hallucinating one to satisfy the
@@ -22,7 +21,8 @@ Rules:
 - education: degree, school, year.
 - projects: name, short description, tech stack mentioned, key outcomes as highlights.
 - skills: flat list of skills actually stated, each as its own item with an optional category.
-- summary: a one-sentence neutral restatement of who the candidate is, only from stated facts.
+- summary: one sentence in resume style WITHOUT the candidate's name or any pronoun, e.g. "Backend developer with 2 years of experience building REST APIs." Only from stated facts.
+- Formatting cleanup (this is allowed and expected): fix capitalization and spelling of names, employers, schools, degrees and job titles ("priya sharma" -> "Priya Sharma"); write skills in their standard form ("python" -> "Python", "postgres" -> "PostgreSQL", "aws" -> "AWS"); write dates like "Jan 2023" and use "Present" for a current role (never "now" or "till date"). Never change facts while cleaning up.
 - Output ONLY the structured data.`;
 
 export interface ProfileParseResult {
@@ -32,9 +32,8 @@ export interface ProfileParseResult {
 // Single-shot profile structuring: freeform resume prose -> normalized profile
 // with stable item ids assigned by normalizeProfile afterwards.
 export async function parseProfileFromText(rawText: string): Promise<ProfileParseResult> {
-  const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const { object } = await generateObject({
-    model: openai(MODEL_ID),
+    model: getChatModel(),
     schema: llmProfileSchema,
     system: SYSTEM_PROMPT,
     prompt: rawText,

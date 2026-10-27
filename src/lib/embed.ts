@@ -1,3 +1,4 @@
+import './env';
 import { embedMany } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 import { stemTokens, tokenize } from './tokenize';
@@ -41,10 +42,14 @@ let openAiProvider: EmbeddingProvider | null = null;
 
 function getOpenAiEmbeddingProvider(): EmbeddingProvider {
   if (!openAiProvider) {
-    const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const model = openai.embedding('text-embedding-3-small');
+    const openai = createOpenAI({
+      apiKey: process.env.EMBED_API_KEY ?? process.env.OPENAI_API_KEY,
+      baseURL: process.env.EMBED_BASE_URL || undefined,
+    });
+    const modelId = process.env.EMBED_MODEL || 'text-embedding-3-small';
+    const model = openai.embedding(modelId);
     openAiProvider = {
-      name: 'openai-text-embedding-3-small',
+      name: `embedding-${modelId}`,
       async embed(texts: string[]) {
         const { embeddings } = await embedMany({ model, values: texts });
         return embeddings;
@@ -56,7 +61,8 @@ function getOpenAiEmbeddingProvider(): EmbeddingProvider {
 
 export function getEmbeddingProvider(): EmbeddingProvider {
   if (process.env.NODE_ENV === 'test') return hashEmbeddingProvider;
-  if (!process.env.OPENAI_API_KEY) return hashEmbeddingProvider;
+  // No embedding key -> free offline hash embedder (deterministic).
+  if (!process.env.EMBED_API_KEY && !process.env.OPENAI_API_KEY) return hashEmbeddingProvider;
   return getOpenAiEmbeddingProvider();
 }
 

@@ -7,7 +7,7 @@ import { runPipeline } from '../src/lib/orchestrator';
 const usage = `Usage: npx tsx scripts/run-pipeline.ts <profileId> <jdId>
 
 Runs the full generate -> score -> verify -> revise loop and prints an
-iteration-by-iteration report. Requires OPENAI_API_KEY (copy .env.example to .env).`;
+iteration-by-iteration report. Requires LLM_API_KEY (copy .env.example to .env).`;
 
 const [profileId, jdId] = process.argv.slice(2);
 if (!profileId || !jdId) {

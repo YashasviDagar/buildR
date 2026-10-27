@@ -24,7 +24,7 @@ Agentic ATS resume optimization system. buildR takes a candidate's real profile 
 
 ```bash
 npm install
-cp .env.example .env        # add your OPENAI_API_KEY
+cp .env.example .env        # add a free Groq key (any OpenAI-compatible provider works, see .env.example)
 npx drizzle-kit generate    # create migrations
 npx drizzle-kit migrate     # apply them (creates buildr.db)
 ```
@@ -38,7 +38,7 @@ npx tsx scripts/import-profile.ts profile.json --sample
 # Parse a job description
 npx tsx scripts/parse-jd.ts jd.txt --sample
 
-# Import freeform resume text (LLM structuring, needs OPENAI_API_KEY)
+# Import freeform resume text (LLM structuring, needs an LLM key)
 npx tsx scripts/import-profile.ts --raw resume.txt
 
 # Run the full pipeline: generate → score → verify → revise
@@ -63,10 +63,11 @@ npm run dev     # Next.js on http://localhost:3000
 
 ### UI walkthrough
 
-1. **Import a profile** — `/profiles/new`: paste structured JSON, load the sample, or paste freeform resume text for LLM extraction; live Zod validation, stable item ids assigned on save.
-2. **Parse a JD** — `/jds/new`: paste the posting; the parser agent splits must-have vs nice-to-have (this split drives the scoring weights).
-3. **Start a run** — dashboard launcher: pick profile + JD, the loop runs fire-and-forget and the run page polls every 1.5s.
-4. **Watch it** — `/runs/[id]` shows the score-per-iteration chart, verdict stacked bars, component breakdowns, the full claims log with verifier justifications, and an annotated resume preview (toggle annotations off for the clean ATS view).
+1. **Dashboard** (`/`) — **Create Resume** from scratch, or **Upload Existing** (PDF/TXT) and let the extraction agent fill the form. Saved resumes are listed (stored in your browser).
+2. **Builder** (`/builder/[id]`) — step-by-step form (Personal, Summary, Experience, Education, Projects, Skills, Job match) with a live preview. Pick a template (Classic, Modern, Minimal, Sidebar), an accent color, and optionally a profile photo. **Enhance with AI** fixes grammar and wording without adding facts.
+3. **Job match** — paste a job description and click **Optimize for this job**. The generate → score → verify → revise loop rewrites your bullets for the job; the verifier removes anything your own text does not support. Undo restores your version.
+4. **Download PDF** — a single-column (or two-column Sidebar), text-only PDF that ATS parsers can read.
+5. **Verification logs** (`/runs/[id]`) — score-per-iteration chart, verdict bars, component breakdowns, the full claims log with verifier justifications, and an annotated resume preview.
 
 Run phase reports live in `phases/` — one markdown file per completed phase describing what was built and how it was verified.
 

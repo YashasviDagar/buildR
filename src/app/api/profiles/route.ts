@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     }
     const id = nanoid();
     db.insert(profiles).values({ id, rawText, structuredJson: JSON.stringify(parsed.profile) }).run();
-    return NextResponse.json({ id }, { status: 201 });
+    return NextResponse.json({ id, profile: parsed.profile }, { status: 201 });
   }
 
   // Path 2: structured JSON import (same contract as the CLI).
@@ -50,5 +50,5 @@ export async function POST(request: Request) {
 
   const id = nanoid();
   db.insert(profiles).values({ id, rawText: null, structuredJson: JSON.stringify(structured) }).run();
-  return NextResponse.json({ id }, { status: 201 });
+  return NextResponse.json({ id, profile: structured }, { status: 201 });
 }

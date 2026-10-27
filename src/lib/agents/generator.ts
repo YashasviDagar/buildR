@@ -1,5 +1,5 @@
 import { generateObject } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
+import { getChatModel } from '../llm';
 import {
   generatorOutputSchema,
   type GeneratedSection,
@@ -9,7 +9,6 @@ import {
 } from '../../types';
 import { getProfileItem, normalizeProfile } from '../profile/normalize';
 
-const MODEL_ID = 'gpt-4o-mini';
 
 const SYSTEM_PROMPT = `You are a resume writer working inside buildR, an ATS resume optimization system with strict claim traceability.
 
@@ -21,11 +20,14 @@ HARD CONSTRAINTS — violating any of these is a failure:
 5. Do not cite the same sourceItemId for a claim the source item does not cover.
 
 Style:
+- Use correct grammar and spelling. Keep tense consistent: past tense for past roles and projects, present tense for the current role. No first-person pronouns. Every bullet is one complete sentence that starts with a capital letter and ends with a period.
 - Write concise, ATS-friendly resume bullets in plain text (no markdown, no tables, no unicode symbols beyond standard ASCII).
 - Start bullets with a strong past-tense verb.
 - Keep each bullet under 30 words.
 
-Output: the sections list exactly as specified in the schema.`;
+Output: JSON of exactly this shape, nothing else:
+{"sections":[{"section":"experience","bullets":[{"text":"...","sourceItemId":"exp_1"}]}]}
+"sections" is a plain array. "section" must be one of: experience, projects, education, skills (never an employer or project name). Group all bullets of a section together.`;
 
 export interface GeneratorInput {
   jd: ParsedJd;
@@ -48,10 +50,21 @@ export interface GeneratedDraft {
 // sourceItemId does not resolve in the profile is dropped here and reported as
 // a rejection, independent of the verifier.
 export async function generateDraft(input: GeneratorInput): Promise<GeneratedDraft> {
-  const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const { object } = await generateObject({
-    model: openai(MODEL_ID),
+    model: getChatModel(),
     schema: generatorOutputSchema,
+    // Some free models wrap arrays as {"items":[...]}; unwrap before validating.
+    experimental_repairText: async ({ text }) => {
+      try {
+        const o = JSON.parse(text);
+        if (o?.sections && !Array.isArray(o.sections) && Array.isArray(o.sections.items)) {
+          o.sections = o.sections.items;
+        }
+        return JSON.stringify(o);
+      } catch {
+        return null;
+      }
+    },
     system: SYSTEM_PROMPT,
     prompt: buildUserPrompt(input),
     temperature: 0.2,
@@ -79,6 +92,17 @@ export async function generateDraft(input: GeneratorInput): Promise<GeneratedDra
       bullets.push({ text: bullet.text.trim(), sourceItemId: bullet.sourceItemId });
     }
     if (bullets.length > 0) sections.push({ section: section.section, bullets });
+  }
+
+  // Skills are listed, never narrated: rewriting "Skill: Python" into
+  // "Utilized Python for backend services" invents claims the profile never
+  // made. Built in code so the section is grounded by construction.
+  if (input.profile.skills.length > 0) {
+    const skillBullets = input.profile.skills
+      .filter((sk) => sk.itemId)
+      .map((sk) => ({ text: sk.name.trim(), sourceItemId: sk.itemId as string }));
+    const rest = sections.filter((sec) => sec.section !== 'skills');
+    return { sections: [...rest, { section: 'skills', bullets: skillBullets }], droppedUnresolved };
   }
 
   return { sections, droppedUnresolved };

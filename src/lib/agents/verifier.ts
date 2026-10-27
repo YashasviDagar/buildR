@@ -1,5 +1,5 @@
 import { generateObject } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
+import { getChatModel } from '../llm';
 import {
   verifierOutputSchema,
   type ProfileItem,
@@ -9,7 +9,6 @@ import {
 import { getProfileItem } from '../profile/normalize';
 import { renderProfileItemContent } from '../profile/render';
 
-const MODEL_ID = 'gpt-4o-mini';
 
 // SEPARATE SYSTEM PROMPT — deliberately shares nothing with the generator's
 // prompt. The verifier must judge each bullet only against the cited source
@@ -83,7 +82,6 @@ export async function verifyBullets(input: VerifierInput): Promise<VerifiedBulle
   });
 
   if (llmPayload.length > 0) {
-    const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const userPayload = {
       instructions:
         'Each bullet includes its claimed sourceItemId and the verbatim content of that profile item. Judge ONLY against that content.',
@@ -91,7 +89,7 @@ export async function verifyBullets(input: VerifierInput): Promise<VerifiedBulle
     };
 
     const { object } = await generateObject({
-      model: openai(MODEL_ID),
+      model: getChatModel(),
       schema: verifierOutputSchema,
       system: SYSTEM_PROMPT,
       prompt: JSON.stringify(userPayload, null, 2),

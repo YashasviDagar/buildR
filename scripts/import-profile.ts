@@ -9,7 +9,7 @@ import { SAMPLE_PROFILE_PATH } from './sample-paths';
 
 const usage = `Usage: npx tsx scripts/import-profile.ts <profile.json>
        npx tsx scripts/import-profile.ts --sample
-       npx tsx scripts/import-profile.ts --raw <resume.txt>   (LLM structuring, needs OPENAI_API_KEY)`;
+       npx tsx scripts/import-profile.ts --raw <resume.txt>   (LLM structuring, needs an LLM key, see .env.example)`;
 
 const args = process.argv.slice(2);
 const rawMode = args[0] === '--raw';
