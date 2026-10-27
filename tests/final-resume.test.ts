@@ -104,3 +104,31 @@ describe('builder model', () => {
     expect(r.sections[1].lines).toEqual(['Go, Python']);
   });
 });
+
+import { profileToState } from '../src/lib/builder/model';
+
+describe('profileToState', () => {
+  it('drops duplicate and fragment lines when merging description and highlights', () => {
+    const state = profileToState(
+      {
+        contact: { name: 'A B', email: 'a@b.co', links: [] },
+        experience: [],
+        education: [],
+        skills: [],
+        projects: [
+          {
+            name: 'App',
+            tech: [],
+            description: 'Shows forecast using OpenWeather API',
+            highlights: ['Built a weather app in React that shows forecast using OpenWeather API', 'Deployed on Netlify'],
+          },
+        ],
+      },
+      emptyState(),
+    );
+    expect(state.projects[0].description.split('\n')).toEqual([
+      'Built a weather app in React that shows forecast using OpenWeather API',
+      'Deployed on Netlify',
+    ]);
+  });
+});

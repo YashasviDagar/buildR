@@ -18,7 +18,7 @@ Rules:
 - Extract ONLY what the text actually says. Never invent employers, degrees, dates, skills, metrics or achievements. If the text is ambiguous, keep the ambiguity rather than guessing.
 - If the email address is not present in the text, set contact.email to the empty string — do NOT invent one.
 - experience: one entry per distinct role. Put the real accomplishments/achievements/duties into highlights, one phrase each, as close to verbatim as possible. Metrics (%, numbers, durations) must be copied exactly as written — never rounded or inflated.
-- education: degree, school, year.
+- education: degree INCLUDING the field of study exactly as written ("b.tech information technology" -> degree "B.Tech Information Technology"), school, year.
 - projects: name, short description, tech stack mentioned, key outcomes as highlights.
 - skills: flat list of skills actually stated, each as its own item with an optional category.
 - summary: one sentence in resume style WITHOUT the candidate's name or any pronoun, e.g. "Backend developer with 2 years of experience building REST APIs." Only from stated facts.

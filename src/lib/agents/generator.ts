@@ -18,6 +18,8 @@ HARD CONSTRAINTS — violating any of these is a failure:
 3. Metrics (percentages, durations, team sizes, dollar amounts) may appear ONLY if the cited source item contains them verbatim. Never invent or inflate a number.
 4. Tailor wording toward the JD's required skills and keywords ONLY where the cited source genuinely backs them. Rephrasing is allowed; expanding the claim's scope is not.
 5. Do not cite the same sourceItemId for a claim the source item does not cover.
+6. Keep the exact scope of each source line: "helped build" stays "helped build" (never "built"), "worked with" never becomes "led". Do NOT add purposes, outcomes or qualities that are not in the source (for example "to ensure quality" or "to improve reliability").
+7. Write one bullet for each highlight of the source item. Never drop a highlight, even a short one.
 
 Style:
 - Use correct grammar and spelling. Keep tense consistent: past tense for past roles and projects, present tense for the current role. No first-person pronouns. Every bullet is one complete sentence that starts with a capital letter and ends with a period.

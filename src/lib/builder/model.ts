@@ -200,12 +200,31 @@ export function stateToProfile(s: BuilderState): StructuredProfile {
   };
 }
 
+// Join lines, dropping blanks and repeats (the extractor sometimes copies a
+// highlight into the description too).
+function uniqueLines(lines: (string | undefined)[]): string {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const l of lines) {
+    const t = l?.trim();
+    if (!t || seen.has(t.toLowerCase())) continue;
+    seen.add(t.toLowerCase());
+    out.push(t);
+  }
+  // Drop a line that is just a fragment of another kept line.
+  const norm = out.map((x) => x.toLowerCase().replace(/[.\s]+$/, ''));
+  return out
+    .filter((_, i) => !norm.some((o, j) => j !== i && o.length > norm[i].length && o.includes(norm[i])))
+    .join('\n');
+}
+
 // Imported profile (from an uploaded resume) -> builder state.
 export function profileToState(p: StructuredProfile, prev: BuilderState): BuilderState {
   const links = p.contact.links ?? [];
   return {
     ...prev,
     name: p.contact.name,
+    headline: prev.headline || p.experience[0]?.title || '',
     email: p.contact.email,
     phone: p.contact.phone ?? '',
     location: p.contact.location ?? '',
@@ -220,7 +239,7 @@ export function profileToState(p: StructuredProfile, prev: BuilderState): Builde
       endDate: /^(present|now|current)$/i.test(e.endDate ?? '') ? '' : e.endDate ?? '',
       current: !e.endDate || /^(present|now|current)$/i.test(e.endDate),
       location: e.location ?? '',
-      description: [e.description, ...e.highlights].filter(Boolean).join('\n'),
+      description: uniqueLines([e.description, ...e.highlights]),
     })),
     education: p.education.map((e) => ({
       id: newId(),
@@ -234,7 +253,7 @@ export function profileToState(p: StructuredProfile, prev: BuilderState): Builde
       name: pr.name,
       tech: pr.tech.join(', '),
       link: pr.link ?? '',
-      description: [pr.description, ...pr.highlights].filter(Boolean).join('\n'),
+      description: uniqueLines([pr.description, ...pr.highlights]),
     })),
     skills: p.skills.map((s) => s.name),
   };

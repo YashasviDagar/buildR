@@ -16,6 +16,7 @@ import {
   profileToState,
   stateToProfile,
   stateToResume,
+  toBullets,
   type BuilderState,
   type TemplateId,
 } from '@/lib/builder/model';
@@ -198,7 +199,7 @@ export default function BuilderPage() {
 
       type Result = {
         status: 'running' | 'done' | 'failed';
-        bullets?: Record<string, string[]>;
+        bullets?: Record<string, { text: string; verdict: string }[]>;
         rejectedCount?: number;
         jdSkills?: string[];
       };
@@ -211,31 +212,46 @@ export default function BuilderPage() {
 
       const bullets = result.bullets;
       const wanted = new Set((result.jdSkills ?? []).map((x) => x.toLowerCase()));
+
+      // A rewrite is used only when every bullet is fully SUPPORTED and none of
+      // the user's own lines would be lost. Otherwise their wording stays.
+      const kept: string[] = [];
+      let applied = 0;
+      const pick = (itemId: string, original: string, label: string): string => {
+        const list = bullets[itemId];
+        const safe = list && list.length >= toBullets(original).length && list.every((b) => b.verdict === 'SUPPORTED');
+        if (safe) {
+          applied++;
+          return list.map((b) => b.text).join('\n');
+        }
+        kept.push(label);
+        return original;
+      };
+
+      // Built once from the current resume (not inside a state updater) so the
+      // counts in the message are exact.
+      const expIds = s.experience.filter((e) => e.title.trim()).map((e) => e.id);
+      const projIds = s.projects.filter((p) => p.name.trim()).map((p) => p.id);
+      const next: BuilderState = {
+        ...s,
+        experience: s.experience.map((e) => {
+          const i = expIds.indexOf(e.id);
+          return i >= 0 ? { ...e, description: pick(`exp_${i + 1}`, e.description, e.title) } : e;
+        }),
+        projects: s.projects.map((p) => {
+          const i = projIds.indexOf(p.id);
+          return i >= 0 ? { ...p, description: pick(`prj_${i + 1}`, p.description, p.name) } : p;
+        }),
+        skills: [...s.skills].sort(
+          (a, b) => Number(wanted.has(b.toLowerCase())) - Number(wanted.has(a.toLowerCase())),
+        ),
+      };
       setBefore(s);
       setRunId(newRunId);
-      setS((prev) => {
-        const expIds = prev.experience.filter((e) => e.title.trim()).map((e) => e.id);
-        const projIds = prev.projects.filter((p) => p.name.trim()).map((p) => p.id);
-        return {
-          ...prev,
-          experience: prev.experience.map((e) => {
-            const i = expIds.indexOf(e.id);
-            const b = i >= 0 ? bullets[`exp_${i + 1}`] : undefined;
-            return b?.length ? { ...e, description: b.join('\n') } : e;
-          }),
-          projects: prev.projects.map((p) => {
-            const i = projIds.indexOf(p.id);
-            const b = i >= 0 ? bullets[`prj_${i + 1}`] : undefined;
-            return b?.length ? { ...p, description: b.join('\n') } : p;
-          }),
-          skills: [...prev.skills].sort(
-            (a, b) => Number(wanted.has(b.toLowerCase())) - Number(wanted.has(a.toLowerCase())),
-          ),
-        };
-      });
+      setS(next);
       setNotice(
-        `Optimized for this job. Every bullet was fact-checked against your own text${
-          result.rejectedCount ? ` and ${result.rejectedCount} unsupported claim(s) were removed` : ''
+        `Optimized for this job: ${applied} section(s) rewritten and fact-checked${
+          kept.length ? `; kept your own wording for ${kept.join(', ')} because a rewrite could not be fully confirmed` : ''
         }. Your matching skills now come first.`,
       );
     } catch (err) {
