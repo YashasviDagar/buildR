@@ -180,7 +180,7 @@ export async function buildCreativePdf(
 
   // --- body ---------------------------------------------------------------
   if (side) {
-    const leftTitles = new Set(['EDUCATION', 'SKILLS']);
+    const leftTitles = new Set(['EDUCATION', 'SKILLS', 'TECHNICAL SKILLS']);
     const mainSections = resume.sections.filter((s) => !leftTitles.has(s.title));
     const leftSections = resume.sections.filter((s) => leftTitles.has(s.title));
 

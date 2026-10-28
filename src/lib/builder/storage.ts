@@ -28,7 +28,7 @@ export function listResumes(): SavedResume[] {
 // Fill in fields added after a resume was saved, and map retired templates.
 function normalize(r: SavedResume): SavedResume {
   const state = { ...emptyState(), ...r.state } as BuilderState & { skills?: string[] };
-  if (state.skillGroups.length === 0 && Array.isArray(state.skills) && state.skills.length > 0) {
+  if (state.skillGroups.every((g) => !g.items.trim()) && Array.isArray(state.skills) && state.skills.length > 0) {
     state.skillGroups = [{ id: newId(), label: '', items: state.skills.join(', ') }];
   }
   state.projects = state.projects.map((p) => ({ ...p, dates: p.dates ?? '', role: p.role ?? '', link: p.link ?? '', tech: p.tech ?? '' }));

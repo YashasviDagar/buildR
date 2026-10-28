@@ -14,6 +14,7 @@ import {
   emptyExperience,
   emptyProject,
   emptySkillGroup,
+  SKILL_LABELS,
   emptyState,
   profileToState,
   splitItems,
@@ -542,15 +543,31 @@ export default function BuilderPage() {
                   </button>
                 </div>
                 <Input
-                  placeholder="Python, JavaScript, SQL (comma separated)"
+                  placeholder="e.g. C++, JavaScript, Python (comma separated)"
                   value={g.items}
                   onChange={(ev) => set('skillGroups', patch(s.skillGroups, g.id, { items: ev.target.value }))}
                 />
               </div>
             ))}
-            <Button variant="outline" onClick={() => set('skillGroups', [...s.skillGroups, emptySkillGroup()])}>
-              + Add skill group
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              {SKILL_LABELS.filter((l) => !s.skillGroups.some((g) => g.label.trim().toLowerCase() === l.toLowerCase())).map((l) => (
+                <button
+                  key={l}
+                  type="button"
+                  className="rounded-full border border-[var(--border)] px-3 py-1 text-xs text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--foreground)]"
+                  onClick={() => set('skillGroups', [...s.skillGroups, { ...emptySkillGroup(), label: l }])}
+                >
+                  + {l}
+                </button>
+              ))}
+              <button
+                type="button"
+                className="rounded-full border border-dashed border-[var(--border)] px-3 py-1 text-xs text-[var(--muted)] hover:border-[var(--accent)]"
+                onClick={() => set('skillGroups', [...s.skillGroups, emptySkillGroup()])}
+              >
+                + Custom group
+              </button>
+            </div>
             <p className="rounded-md bg-blue-500/10 p-3 text-xs text-blue-200">
               <b>Tip:</b> group skills like Languages, Frontend, Backend, Databases, Tools. Recruiters scan these lines
               quickly, and ATS match the exact words.

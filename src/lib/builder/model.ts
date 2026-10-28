@@ -70,6 +70,25 @@ export function newId(): string {
   return Math.random().toString(36).slice(2, 10);
 }
 
+export const SKILL_LABELS = [
+  'Languages',
+  'Frontend',
+  'Backend',
+  'Databases & Infra',
+  'AI',
+  'Developer Tools',
+  'Coursework',
+] as const;
+
+// New resumes start with the usual groups so the user only fills in items.
+export function defaultSkillGroups(): SkillGroup[] {
+  return ['Languages', 'Frontend', 'Backend', 'Databases & Infra', 'Developer Tools'].map((label) => ({
+    id: newId(),
+    label,
+    items: '',
+  }));
+}
+
 export const emptyState = (): BuilderState => ({
   name: '',
   headline: '',
@@ -82,7 +101,7 @@ export const emptyState = (): BuilderState => ({
   experience: [],
   education: [],
   projects: [],
-  skillGroups: [],
+  skillGroups: defaultSkillGroups(),
   achievements: [],
   leadership: [],
   educationFirst: false,
@@ -226,7 +245,7 @@ export function stateToResume(s: BuilderState): FinalResume {
 
   if (groups.length > 0) {
     sections.push({
-      title: 'SKILLS',
+      title: 'TECHNICAL SKILLS',
       entries: [],
       lines: groups.map((g) => (g.label ? `${g.label}: ${g.text}` : g.text)),
       labeled: groups,
@@ -375,7 +394,7 @@ export function profileToState(p: StructuredProfile, prev: BuilderState): Builde
       dates: pr.dates ?? '',
       description: uniqueLines([pr.description, ...pr.highlights]),
     })),
-    skillGroups: groupSkills(p.skills),
+    skillGroups: p.skills.length > 0 ? groupSkills(p.skills) : defaultSkillGroups(),
   };
 }
 

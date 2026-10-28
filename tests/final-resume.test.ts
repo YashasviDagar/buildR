@@ -98,7 +98,7 @@ describe('builder model', () => {
     ];
     s.skillGroups = [{ id: 's', label: 'Languages', items: 'Go, Python' }];
     const r = stateToResume(s);
-    expect(r.sections.map((x) => x.title)).toEqual(['PROFESSIONAL EXPERIENCE', 'SKILLS']);
+    expect(r.sections.map((x) => x.title)).toEqual(['PROFESSIONAL EXPERIENCE', 'TECHNICAL SKILLS']);
     expect(r.sections[0].entries).toHaveLength(1);
     expect(r.sections[0].entries[0].meta).toBe('Jan 2022 - Present');
     expect(r.sections[1].lines).toEqual(['Languages: Go, Python']);
