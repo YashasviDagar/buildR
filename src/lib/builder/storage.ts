@@ -19,12 +19,21 @@ export function listResumes(): SavedResume[] {
   try {
     const raw = localStorage.getItem(KEY);
     const all = raw ? (JSON.parse(raw) as SavedResume[]) : [];
-    return all
-      .map((r) => ({ ...r, state: { ...emptyState(), ...r.state } }))
-      .sort((a, b) => b.updatedAt - a.updatedAt);
+    return all.map(normalize).sort((a, b) => b.updatedAt - a.updatedAt);
   } catch {
     return [];
   }
+}
+
+// Fill in fields added after a resume was saved, and map retired templates.
+function normalize(r: SavedResume): SavedResume {
+  const state = { ...emptyState(), ...r.state } as BuilderState & { skills?: string[] };
+  if (state.skillGroups.length === 0 && Array.isArray(state.skills) && state.skills.length > 0) {
+    state.skillGroups = [{ id: newId(), label: '', items: state.skills.join(', ') }];
+  }
+  state.projects = state.projects.map((p) => ({ ...p, dates: p.dates ?? '', role: p.role ?? '', link: p.link ?? '', tech: p.tech ?? '' }));
+  const template = (r.template as string) === 'classic' ? 'professional' : r.template;
+  return { ...r, state, template };
 }
 
 function writeAll(all: SavedResume[]) {
@@ -54,7 +63,7 @@ export function createResume(state?: BuilderState, title = 'My Resume'): SavedRe
     title,
     updatedAt: Date.now(),
     state: state ?? emptyState(),
-    template: 'classic',
+    template: 'professional',
     accent: '#2563eb',
   };
   saveResume(r);

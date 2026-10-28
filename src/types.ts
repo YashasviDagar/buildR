@@ -44,6 +44,8 @@ export const projectItemSchema = z.object({
   tech: z.array(z.string()).default([]),
   highlights: z.array(z.string()).default([]),
   link: z.string().optional(),
+  dates: z.string().optional(),
+  role: z.string().optional(),
 });
 
 export const skillItemSchema = z.object({
@@ -60,6 +62,9 @@ export const structuredProfileSchema = z.object({
   education: z.array(educationItemSchema).default([]),
   projects: z.array(projectItemSchema).default([]),
   skills: z.array(skillItemSchema).default([]),
+  // Not used by the verified pipeline; carried through so uploads keep them.
+  achievements: z.array(z.object({ label: z.string().optional(), text: z.string().min(1) })).optional(),
+  leadership: z.array(experienceItemSchema).optional(),
 });
 
 export type StructuredProfile = z.infer<typeof structuredProfileSchema>;

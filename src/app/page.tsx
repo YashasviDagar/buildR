@@ -77,7 +77,7 @@ export default function Dashboard() {
           {busy ? 'Reading your resume…' : 'Upload Existing'}
           <input
             type="file"
-            accept=".pdf,.txt,.md"
+            accept=".pdf,.docx,.txt,.md"
             className="hidden"
             disabled={busy}
             onChange={(e) => void upload(e.target.files?.[0])}

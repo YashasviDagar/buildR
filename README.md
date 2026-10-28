@@ -47,6 +47,12 @@ npx tsx scripts/run-pipeline.ts <profileId> <jdId>
 
 `run-pipeline.ts` prints iteration-by-iteration scores, per-claim verdicts (SUPPORTED / PARTIAL / UNSUPPORTED with justifications), the stop reason, and the final score.
 
+## Evaluation
+
+```bash
+npm run eval   # verdict totals and first-draft vs final-draft unsupported rate, from the claims table
+```
+
 ## Tests
 
 ```bash
@@ -63,7 +69,7 @@ npm run dev     # Next.js on http://localhost:3000
 
 ### UI walkthrough
 
-1. **Dashboard** (`/`) — **Create Resume** from scratch, or **Upload Existing** (PDF/TXT) and let the extraction agent fill the form. Saved resumes are listed (stored in your browser).
+1. **Dashboard** (`/`) — **Create Resume** from scratch, or **Upload Existing** (PDF, Word or TXT) and let the extraction agent fill the form. Saved resumes are listed (stored in your browser).
 2. **Builder** (`/builder/[id]`) — step-by-step form (Personal, Summary, Experience, Education, Projects, Skills, Job match) with a live preview. Pick a template (Classic, Modern, Minimal, Sidebar), an accent color, and optionally a profile photo. **Enhance with AI** fixes grammar and wording without adding facts.
 3. **Job match** — paste a job description and click **Optimize for this job**. The generate → score → verify → revise loop rewrites your bullets for the job; the verifier removes anything your own text does not support. Undo restores your version.
 4. **Download PDF** — a single-column (or two-column Sidebar), text-only PDF that ATS parsers can read.

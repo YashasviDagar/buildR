@@ -96,12 +96,12 @@ describe('builder model', () => {
       { id: 'a', title: 'Engineer', org: 'Acme', startDate: 'Jan 2022', endDate: '', current: true, location: '', description: '- Built things' },
       { id: 'b', title: '', org: '', startDate: '', endDate: '', current: false, location: '', description: '' },
     ];
-    s.skills = ['Go', 'Python'];
+    s.skillGroups = [{ id: 's', label: 'Languages', items: 'Go, Python' }];
     const r = stateToResume(s);
     expect(r.sections.map((x) => x.title)).toEqual(['PROFESSIONAL EXPERIENCE', 'SKILLS']);
     expect(r.sections[0].entries).toHaveLength(1);
     expect(r.sections[0].entries[0].meta).toBe('Jan 2022 - Present');
-    expect(r.sections[1].lines).toEqual(['Go, Python']);
+    expect(r.sections[1].lines).toEqual(['Languages: Go, Python']);
   });
 });
 
@@ -130,5 +130,63 @@ describe('profileToState', () => {
       'Built a weather app in React that shows forecast using OpenWeather API',
       'Deployed on Netlify',
     ]);
+  });
+});
+
+describe('standard templates', () => {
+  it('shrinks a long resume to one page and keeps text extractable', async () => {
+    const s = emptyState();
+    s.name = 'Long Resume';
+    s.email = 'l@example.com';
+    s.experience = Array.from({ length: 5 }, (_, i) => ({
+      id: `e${i}`,
+      title: 'Engineer',
+      org: `Company ${i}`,
+      startDate: '2020',
+      endDate: '2021',
+      current: false,
+      location: '',
+      description: Array.from({ length: 4 }, (_, j) => `Built feature number ${j} that improved the product for many users and reduced costs.`).join('\n'),
+    }));
+    const resume = stateToResume(s);
+    for (const t of ['professional', 'compact', 'executive'] as const) {
+      const bytes = await buildResumePdf(resume, { template: t });
+      expect(Buffer.from(bytes.slice(0, 5)).toString()).toBe('%PDF-');
+    }
+  });
+});
+
+describe('profileToState extras', () => {
+  it('keeps skill groups, achievements, leadership, project role and dates from an upload', () => {
+    const state = profileToState(
+      {
+        contact: { name: 'A B', email: 'a@b.co', links: [] },
+        experience: [],
+        education: [{ degree: 'B.Tech', school: 'VIT', year: 'July 2024 - May 2028', details: 'CGPA: 8.68' }],
+        projects: [{ name: 'App', tech: ['Next.js'], highlights: ['Built it'], role: 'Founder', dates: '2026' }],
+        skills: [
+          { name: 'C++', category: 'Languages' },
+          { name: 'Python', category: 'Languages' },
+          { name: 'React', category: 'Frontend' },
+        ],
+        achievements: [{ label: 'LeetCode', text: 'Rating 1687.' }],
+        leadership: [{ title: 'Core Member', org: 'SAE', startDate: 'March 2025', endDate: 'Present', highlights: ['Planned events'] }],
+      },
+      emptyState(),
+    );
+    expect(state.skillGroups.map((g) => [g.label, g.items])).toEqual([
+      ['Languages', 'C++, Python'],
+      ['Frontend', 'React'],
+    ]);
+    expect(state.achievements[0]).toMatchObject({ label: 'LeetCode', text: 'Rating 1687.' });
+    expect(state.leadership[0]).toMatchObject({ org: 'SAE', current: true });
+    expect(state.projects[0]).toMatchObject({ role: 'Founder', dates: '2026' });
+    expect(state.educationFirst).toBe(true);
+
+    const resume = stateToResume(state);
+    const titles = resume.sections.map((s) => s.title);
+    expect(titles).toContain('CERTIFICATIONS & ACHIEVEMENTS');
+    expect(titles).toContain('LEADERSHIP / EXTRACURRICULAR');
+    expect(resume.sections.find((s) => s.title === 'PROJECTS')?.entries[0].parts?.note).toBe('Founder | Next.js');
   });
 });

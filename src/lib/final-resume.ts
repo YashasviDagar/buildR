@@ -5,9 +5,20 @@ import type { GeneratedSection, ParsedJd, StructuredProfile } from '../types';
 // profile in code, never from the LLM. Only bullets the verifier did not
 // reject are kept.
 
+// Structured layout used by the standard templates: bold primary line with
+// dates on the right, italic secondary line with a right-hand detail.
+export interface EntryParts {
+  primary: string;
+  secondary?: string;
+  note?: string; // italic text after the primary (e.g. tech stack)
+  dates?: string;
+  right?: string;
+}
+
 export interface ResumeEntry {
   heading: string;
   meta?: string;
+  parts?: EntryParts;
   bullets: string[];
 }
 
@@ -15,6 +26,7 @@ export interface ResumeSection {
   title: string;
   entries: ResumeEntry[];
   lines?: string[];
+  labeled?: { label: string; text: string }[];
 }
 
 export interface FinalResume {
